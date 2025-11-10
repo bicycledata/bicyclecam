@@ -1,3 +1,4 @@
+import os
 import subprocess
 import time
 import traceback
@@ -14,6 +15,9 @@ def main(bicycleinit: Connection, name: str, args: dict):
   try:
     interval = int(args.get('interval', 5))    # seconds between pictures
     output_format = args.get('format', 'png')  # lossless format: png
+    session = args['session']
+
+    temp_dir = os.path.join('temp', session)
 
     t = time.monotonic() - interval
 
@@ -32,7 +36,7 @@ def main(bicycleinit: Connection, name: str, args: dict):
       # Take a picture with fixed settings and capture output to check success
       result = subprocess.run([
         "/usr/bin/rpicam-still",
-        "-o", filename,
+        "-o", temp_dir / filename,
         "--shutter", "10000",    # exposure in microseconds (20 ms)
         "--gain", "1.0",         # ISO/gain
         "--awb", "custom",       # disable auto white balance
