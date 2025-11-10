@@ -32,11 +32,12 @@ def main(bicycleinit: Connection, name: str, args: dict):
       # Create a timestamped filename
       timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
       filename = f"photo_{timestamp}.{output_format}"
+      output_path = os.path.join(temp_dir, filename)
 
       # Take a picture with fixed settings and capture output to check success
       result = subprocess.run([
         "/usr/bin/rpicam-still",
-        "-o", temp_dir / filename,
+        "-o", output_path,
         "--shutter", "10000",    # exposure in microseconds (20 ms)
         "--gain", "1.0",         # ISO/gain
         "--awb", "custom",       # disable auto white balance
@@ -47,6 +48,7 @@ def main(bicycleinit: Connection, name: str, args: dict):
       ], capture_output=True, text=True)
 
       if result.returncode == 0:
+        # Record only the filename (not full path) as the measurement
         sensor.write_measurement([filename])
       else:
         msg = (
