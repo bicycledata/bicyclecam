@@ -50,6 +50,7 @@ def main(bicycleinit: Connection, name: str, args: dict):
       if result.returncode == 0:
         # Record only the filename (not full path) as the measurement
         sensor.write_measurement([filename])
+        sensor.send_msg({'type': 'upload', 'file': filename})
       else:
         msg = (
           f"rpicam-still failed for {filename} (rc={result.returncode}). "
