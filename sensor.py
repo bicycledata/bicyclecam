@@ -45,7 +45,6 @@ def main(bicycleinit: Connection, name: str, args: dict):
         "--ev", "0",
         "--autofocus-on-capture", "0",
         "--zsl", "0",
-        "--raw",
         "--rotation", "180",
         "--immediate",       # capture immediately
         "--nopreview",
