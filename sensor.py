@@ -55,7 +55,7 @@ def main(bicycleinit: Connection, name: str, args: dict):
         # Record only the filename (not full path) as the measurement
         sensor.write_measurement([filename])
         sensor.send_msg({'type': 'upload', 'file': filename})
-        sensor.send_msg({'type': 'upload', 'file': f"{name}_{timestamp}.dwg"})
+        sensor.send_msg({'type': 'upload', 'file': f"{name}_{timestamp}.dng"})
       else:
         msg = (
           f"rpicam-still failed for {filename} (rc={result.returncode}). "
