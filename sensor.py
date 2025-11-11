@@ -31,19 +31,23 @@ def main(bicycleinit: Connection, name: str, args: dict):
 
       # Create a timestamped filename
       timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-      filename = f"photo_{timestamp}.{output_format}"
+      filename = f"{name}_{timestamp}.{output_format}"
       output_path = os.path.join(temp_dir, filename)
 
       # Take a picture with fixed settings and capture output to check success
       result = subprocess.run([
         "/usr/bin/rpicam-still",
-        "-o", output_path,
+        "--encoding", output_format,
+        "--output", output_path,
         "--shutter", "10000",    # exposure in microseconds (20 ms)
         "--gain", "1.0",         # ISO/gain
-        "--awb", "custom",       # disable auto white balance
+        "--awbgains", "1,1",       # disable auto white balance
         "--ev", "0",
         "--autofocus-on-capture", "0",
         "--zsl", "0",
+        "--raw",
+        "--rotation", "180",
+        "--immediate",       # capture immediately
         "--nopreview",
       ], capture_output=True, text=True)
 
@@ -51,6 +55,7 @@ def main(bicycleinit: Connection, name: str, args: dict):
         # Record only the filename (not full path) as the measurement
         sensor.write_measurement([filename])
         sensor.send_msg({'type': 'upload', 'file': filename})
+        sensor.send_msg({'type': 'upload', 'file': f"{name}_{timestamp}.dwg"})
       else:
         msg = (
           f"rpicam-still failed for {filename} (rc={result.returncode}). "
