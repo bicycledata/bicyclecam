@@ -41,7 +41,7 @@ def main(bicycleinit: Connection, name: str, args: dict):
         t += interval * count
 
       # Create a timestamped filename
-      timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+      timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S.%f")
       filename = f"{name}_{timestamp}.{output_format}"
       output_path = os.path.join(temp_dir, filename)
 
