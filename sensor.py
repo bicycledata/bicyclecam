@@ -80,7 +80,8 @@ def main(bicycleinit: Connection, name: str, args: dict):
     pass
   except Exception as e:
     sensor.send_msg({'type': 'log', 'level': 'error', 'msg': str(e)})
-    sensor.send_msg({'type': 'log', 'level': 'error', 'msg': traceback.format_exc()})
+    if raw:
+      sensor.send_msg({'type': 'log', 'level': 'error', 'msg': traceback.format_exc()})
   finally:
     sensor.shutdown()
 
