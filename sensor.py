@@ -1,6 +1,7 @@
 import os
 import subprocess
 import time
+import math
 import traceback
 from datetime import datetime
 from multiprocessing.connection import Connection
@@ -13,7 +14,9 @@ def main(bicycleinit: Connection, name: str, args: dict):
   sensor.write_header(['file'])
 
   try:
-    interval = int(args.get('interval', 5))    # seconds between pictures
+    interval = float(args.get('interval', 5.0))    # seconds between pictures
+    if interval <= 0:
+      raise ValueError("interval must be > 0")
     output_format = args.get('format', 'png')  # lossless format: png
     session = args['session']
 
@@ -31,7 +34,11 @@ def main(bicycleinit: Connection, name: str, args: dict):
         time.sleep(0.1)
         continue
 
-      t += interval * ((tn - t) // interval)
+      # Align t forward by the number of full intervals that passed.
+      # Use integer count to avoid issues with float floor-division precision.
+      count = int((tn - t) / interval)
+      if count > 0:
+        t += interval * count
 
       # Create a timestamped filename
       timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -39,7 +46,7 @@ def main(bicycleinit: Connection, name: str, args: dict):
       output_path = os.path.join(temp_dir, filename)
 
       # Take a picture with fixed settings and capture output to check success
-      args = [
+      proc_args = [
         "/usr/bin/rpicam-still",
         "--encoding", output_format,
         "--output", output_path,
@@ -54,9 +61,9 @@ def main(bicycleinit: Connection, name: str, args: dict):
         "--nopreview",
       ]
       if raw:
-        args.append("--raw")
+        proc_args.append("--raw")
 
-      result = subprocess.run(args, capture_output=True, text=True)
+      result = subprocess.run(proc_args, capture_output=True, text=True)
       if result.returncode == 0:
         # Record only the filename (not full path) as the measurement
         sensor.write_measurement([filename])
