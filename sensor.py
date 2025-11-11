@@ -17,6 +17,10 @@ def main(bicycleinit: Connection, name: str, args: dict):
     output_format = args.get('format', 'png')  # lossless format: png
     session = args['session']
 
+    raw = args.get('raw', False)
+    rotation = args.get('rotation', 180) # 0 or 180
+    shutter = args.get('shutter', 10000) # exposure in microseconds
+
     temp_dir = os.path.join('temp', session)
 
     t = time.monotonic() - interval
@@ -35,22 +39,24 @@ def main(bicycleinit: Connection, name: str, args: dict):
       output_path = os.path.join(temp_dir, filename)
 
       # Take a picture with fixed settings and capture output to check success
-      result = subprocess.run([
+      args = [
         "/usr/bin/rpicam-still",
         "--encoding", output_format,
         "--output", output_path,
-        "--shutter", "10000",    # exposure in microseconds (20 ms)
+        "--shutter", f"{shutter}",    # exposure in microseconds
         "--gain", "1.0",         # ISO/gain
         "--awbgains", "1,1",       # disable auto white balance
         "--ev", "0",
         "--autofocus-on-capture", "0",
         "--zsl", "0",
-        "--raw",
-        "--rotation", "180",
+        "--rotation", f"{rotation}",
         "--immediate",       # capture immediately
         "--nopreview",
-      ], capture_output=True, text=True)
+      ]
+      if raw:
+        args.append("--raw")
 
+      result = subprocess.run(args, capture_output=True, text=True)
       if result.returncode == 0:
         # Record only the filename (not full path) as the measurement
         sensor.write_measurement([filename])
